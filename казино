@@ -1,0 +1,123 @@
+<Project Sdk="Microsoft.NET.Sdk.Web">
+
+  <PropertyGroup>
+    <TargetFramework>net8.0</TargetFramework>
+    <Nullable>enable</Nullable>
+    <ImplicitUsings>enable</ImplicitUsings>
+  </PropertyGroup>
+
+</Project>
+
+var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddControllers();
+builder.Services.AddCors();
+
+var app = builder.Build();
+app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
+app.MapControllers();
+app.Run();
+
+namespace CasinoApi.Models;
+
+public class MoralMessage
+{
+    public int Id { get; set; }
+    public string Text { get; set; } = string.Empty;
+}
+
+namespace CasinoApi.Models;
+
+public class GameResult
+{
+    public bool Win { get; set; }
+    public int Amount { get; set; }
+}
+
+namespace CasinoApi.Models;
+
+public class WithdrawResult
+{
+    public bool Success { get; set; }
+    public bool IsBsod { get; set; }
+    public string Moral { get; set; } = string.Empty;
+    public int Amount { get; set; }
+}
+
+namespace CasinoApi.Data;
+
+public static class MoralDb
+{
+    private static readonly string[] Messages = {
+        "Ты серьёзно? Деньги — это просто бумага. Позвони маме, она ждёт!",
+        "Уолтер Уайт пожалел о содеянном. А ты ещё нет?",
+        "Твой кот смотрит на тебя с осуждением. Он разочарован.",
+        "Бабушка молится за твою душу каждую ночь. А ты тут играешь.",
+        "Илон Маск сказал бы: 'Будь полезнее для человечества'.",
+        "Семья > Джекпот. Всегда. Всегда!",
+        "Ты лучше, чем этот экран. Закрой его и живи реальной жизнью.",
+        "Помни: в конце игры ты проиграешь всё. Даже душу.",
+        "Ставки — это наркотик. А ты умнее, правда?",
+        "Что бы ты делал с этими деньгами? Купил бы счастье? Не выйдет.",
+        "Твоя подруга смотрит на тебя с надеждой. Не подведи её.",
+        "Джекпот — это миф. А любовь — реальность.",
+        "Ты мог бы купить пиццу и накормить бездомного. Вместо этого ты здесь."
+    };
+
+    private static readonly Random _rnd = new();
+
+    public static string GetRandomMoral() => Messages[_rnd.Next(Messages.Length)];
+}
+
+using Microsoft.AspNetCore.Mvc;
+using CasinoApi.Models;
+using CasinoApi.Data;
+
+namespace CasinoApi.Controllers;
+
+[ApiController]
+[Route("api/[controller]")]
+public class CasinoController : ControllerBase
+{
+    private readonly Random _rnd = new();
+
+    [HttpGet("play")]
+    public IActionResult Play()
+    {
+        var win = _rnd.Next(1, 101) > 50;
+        var amount = win ? _rnd.Next(10, 500) : 0;
+
+        return Ok(new GameResult { Win = win, Amount = amount });
+    }
+
+    [HttpPost("withdraw")]
+    public IActionResult Withdraw([FromBody] int amount)
+    {
+        var moral = MoralDb.GetRandomMoral();
+        return Ok(new WithdrawResult
+        {
+            Success = false,
+            IsBsod = true,
+            Moral = moral,
+            Amount = amount
+        });
+    }
+
+    [HttpGet("morals")]
+    public IActionResult GetAllMorals()
+    {
+        var list = MoralDb.GetAllMorals(); // добавим метод
+        return Ok(list);
+    }
+}
+
+public static List<string> GetAllMorals() => Messages.ToList();
+
+{
+  "Logging": {
+    "LogLevel": {
+      "Default": "Information",
+      "Microsoft.AspNetCore": "Warning"
+    }
+  },
+  "AllowedHosts": "*"
+}
