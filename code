@@ -1,0 +1,607 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>NEON CASINO · WITHDRAWAL PROTOCOL 77</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      background: radial-gradient(circle at 20% 20%, #0b001a, #03000a);
+      font-family: 'Segoe UI', 'Arial Black', system-ui, sans-serif;
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      position: relative;
+      overflow-x: hidden;
+      padding: 1rem;
+    }
+
+    /* scanlines & glitch overlay */
+    body::before {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: repeating-linear-gradient(0deg, rgba(0,0,0,0.15) 0px, rgba(0,0,0,0.15) 1px, transparent 1px, transparent 3px);
+      pointer-events: none;
+      z-index: 999;
+      mix-blend-mode: overlay;
+    }
+
+    body::after {
+      content: "";
+      position: fixed;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: radial-gradient(circle, transparent 30%, rgba(255, 0, 150, 0.1) 80%);
+      pointer-events: none;
+      z-index: 998;
+      animation: glitchOverlay 8s infinite;
+    }
+
+    @keyframes glitchOverlay {
+      0% { opacity: 0.4; transform: translateX(0); }
+      25% { opacity: 0.6; transform: translateX(-1px); }
+      50% { opacity: 0.3; transform: translateX(2px); }
+      75% { opacity: 0.5; transform: translateX(-2px); }
+      100% { opacity: 0.4; transform: translateX(0); }
+    }
+
+    .app-container {
+      background: rgba(5, 0, 20, 0.75);
+      backdrop-filter: blur(12px);
+      border: 2px solid #ff2bd6;
+      border-radius: 3rem;
+      padding: 2rem 2rem 3rem;
+      max-width: 1100px;
+      width: 100%;
+      box-shadow: 0 0 60px #ff00c8, 0 0 120px #00e0ff80, 0 0 200px #6200ff;
+      position: relative;
+      z-index: 10;
+    }
+
+    h1 {
+      font-size: 3.2rem;
+      font-weight: 900;
+      letter-spacing: 4px;
+      text-align: center;
+      text-transform: uppercase;
+      background: linear-gradient(45deg, #ff4dd8, #a066ff, #00e0ff);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      filter: drop-shadow(0 0 20px #ff00c8);
+      margin-bottom: 1rem;
+    }
+
+    .register-panel {
+      background: rgba(18, 0, 35, 0.8);
+      border: 2px solid #cc00ff;
+      border-radius: 2rem;
+      padding: 1.8rem 2rem;
+      margin-bottom: 2rem;
+      box-shadow: 0 0 30px #b100ff, inset 0 0 15px #ff66d9;
+      backdrop-filter: blur(8px);
+    }
+
+    .register-panel h2 {
+      color: #e67fff;
+      text-shadow: 0 0 12px #ff00d4;
+      font-size: 1.8rem;
+      margin-bottom: 1rem;
+      letter-spacing: 2px;
+    }
+
+    .signup-form {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1.5rem;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .signup-form input {
+      background: #12001f;
+      border: 2px solid #a44dff;
+      border-radius: 3rem;
+      padding: 0.9rem 1.5rem;
+      font-size: 1rem;
+      color: #f0e6ff;
+      outline: none;
+      min-width: 220px;
+      flex: 1;
+      box-shadow: 0 0 20px #9b30ff;
+      transition: 0.2s;
+    }
+
+    .signup-form input:focus {
+      border-color: #ff4dd8;
+      box-shadow: 0 0 40px #ff66d9, inset 0 0 8px #ffffff;
+    }
+
+    .btn-neon {
+      background: transparent;
+      border: 2px solid #ff2bc2;
+      color: #ffe6f9;
+      font-weight: bold;
+      letter-spacing: 2px;
+      padding: 0.9rem 2.2rem;
+      border-radius: 4rem;
+      cursor: pointer;
+      text-transform: uppercase;
+      font-size: 1rem;
+      box-shadow: 0 0 20px #ff2bc2, 0 0 30px #00ccff;
+      transition: all 0.2s;
+      white-space: nowrap;
+    }
+
+    .btn-neon:hover {
+      background: #ff2bc2;
+      color: #000;
+      box-shadow: 0 0 50px #ff66d9, 0 0 80px #e600ff;
+      border-color: #ffffff;
+    }
+
+    .game-blocks {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 2rem;
+      justify-content: center;
+      margin: 2.5rem 0 2rem;
+    }
+
+    .game-card {
+      flex: 1 1 280px;
+      background: rgba(10, 0, 20, 0.7);
+      border-radius: 2.5rem;
+      padding: 1.5rem;
+      border: 2px solid;
+      transition: 0.3s;
+      backdrop-filter: blur(5px);
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      text-align: center;
+    }
+
+    .womens-section {
+      border-color: #ff4dd8;
+      background: linear-gradient(145deg, #3a0020b0, #1c001a);
+      box-shadow: 0 0 45px #ff00aa, inset 0 0 20px #ffb3e6;
+    }
+
+    .mens-section {
+      border-color: #00c3ff;
+      background: linear-gradient(145deg, #002233c0, #00162b);
+      box-shadow: 0 0 45px #00ccff, inset 0 0 20px #aee6ff;
+    }
+
+    .section-title {
+      font-size: 2rem;
+      font-weight: 800;
+      margin-bottom: 0.5rem;
+      text-transform: uppercase;
+    }
+
+    .womens-section .section-title {
+      color: #ffeef9;
+      text-shadow: 0 0 25px #ff66d9, 0 0 50px #ff0088;
+    }
+
+    .mens-section .section-title {
+      color: #e3f7ff;
+      text-shadow: 0 0 25px #00a2ff, 0 0 50px #0088ff;
+    }
+
+    .game-area {
+      margin: 1.2rem 0;
+      width: 100%;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    .wheel-container {
+      position: relative;
+      width: 140px;
+      height: 140px;
+      margin-bottom: 1rem;
+    }
+
+    canvas {
+      display: block;
+      border-radius: 50%;
+      box-shadow: 0 0 30px #ff66d9, 0 0 50px #b100ff;
+    }
+
+    .mens-section canvas {
+      box-shadow: 0 0 30px #00ccff, 0 0 50px #0055ff;
+    }
+
+    .glitter-animation {
+      animation: sparkleMove 1.2s infinite alternate;
+    }
+
+    @keyframes sparkleMove {
+      0% { filter: brightness(1) drop-shadow(0 0 10px gold); }
+      100% { filter: brightness(1.4) drop-shadow(0 0 35px #ffd700); }
+    }
+
+    .dynamic-text {
+      font-size: 1.2rem;
+      letter-spacing: 2px;
+      background: linear-gradient(45deg, gold, #ffb6c1);
+      -webkit-background-clip: text;
+      background-clip: text;
+      color: transparent;
+      margin: 0.5rem 0;
+    }
+
+    .withdraw-btn {
+      background: transparent;
+      border: 3px solid;
+      padding: 0.8rem 2rem;
+      border-radius: 3rem;
+      font-weight: 900;
+      text-transform: uppercase;
+      letter-spacing: 3px;
+      margin-top: 1rem;
+      cursor: pointer;
+      transition: 0.2s;
+      font-size: 1rem;
+    }
+
+    .womens-section .withdraw-btn {
+      border-color: #ffd700;
+      color: #ffd700;
+      box-shadow: 0 0 20px gold, 0 0 30px #ff4dd8;
+    }
+
+    .mens-section .withdraw-btn {
+      border-color: #00e0ff;
+      color: #b3f0ff;
+      box-shadow: 0 0 20px #00ccff, 0 0 30px #0044ff;
+    }
+
+    .withdraw-btn:hover {
+      background: white;
+      color: black;
+    }
+
+    /* BSOD overlay */
+    #bsod-overlay {
+      position: fixed;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
+      background: #0000aa;
+      color: #ffffff;
+      font-family: 'Lucida Console', 'Courier New', monospace;
+      display: none;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      z-index: 10000;
+      padding: 2rem;
+      text-align: left;
+      box-shadow: inset 0 0 100px #000;
+    }
+
+    .bsod-text {
+      max-width: 900px;
+      width: 100%;
+      font-size: 1.2rem;
+      line-height: 1.6;
+      letter-spacing: 1px;
+      text-shadow: 0 0 10px #aaaaaa;
+    }
+
+    .bsod-error {
+      font-size: 4rem;
+      font-weight: bold;
+      margin-bottom: 1.5rem;
+      color: #ffffff;
+      text-transform: uppercase;
+      text-shadow: 0 0 30px #888;
+    }
+
+    .hidden {
+      display: none !important;
+    }
+
+    .footer-note {
+      color: #b8b8ff;
+      text-align: center;
+      margin-top: 1rem;
+      font-style: italic;
+      text-shadow: 0 0 10px #ff66d9;
+    }
+
+    @media (max-width: 700px) {
+      .app-container { padding: 1.2rem; }
+      h1 { font-size: 2.4rem; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container" id="appContainer">
+    <h1>🌆 VICE CASINO 77 🌆</h1>
+
+    <!-- Registration panel -->
+    <div class="register-panel" id="registerPanel">
+      <h2>🔮 ENTER THE NEON MATRIX</h2>
+      <div class="signup-form">
+        <input type="text" id="usernameInput" placeholder="Codename / Alias" autocomplete="off">
+        <button class="btn-neon" id="registerBtn">⏩ INITIALIZE</button>
+      </div>
+    </div>
+
+    <!-- Two game blocks (initially hidden until register) -->
+    <div class="game-blocks hidden" id="gameBlocks">
+      <!-- Block 1: Women's Section -->
+      <div class="game-card womens-section">
+        <div class="section-title">💎 GLAMOUR SPIN</div>
+        <div class="game-area">
+          <div class="wheel-container glitter-animation">
+            <canvas id="wheelWomenCanvas" width="140" height="140"></canvas>
+          </div>
+          <div class="dynamic-text" id="womenGameResult">✨ spin to win ✨</div>
+          <button class="withdraw-btn" id="withdrawWomenBtn">💸 WITHDRAW</button>
+        </div>
+      </div>
+
+      <!-- Block 2: Men's Section -->
+      <div class="game-card mens-section">
+        <div class="section-title">⚡ TURBO KICK</div>
+        <div class="game-area">
+          <canvas id="kickCanvas" width="150" height="100" style="border-radius: 1rem; background: #001a2e; box-shadow: 0 0 30px #00a2ff;"></canvas>
+          <div class="dynamic-text" id="mensGameResult">⚽ CLICK TO KICK</div>
+          <button class="withdraw-btn" id="withdrawMenBtn">🏦 CASH OUT</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="footer-note">⚠️ WITHDRAWAL PROTOCOL 77 — GLITCH EXPECTED ⚠️</div>
+  </div>
+
+  <!-- BSOD overlay -->
+  <div id="bsod-overlay">
+    <div class="bsod-error">😵 BSOD · CRITICAL_WITHDRAWAL_ERROR</div>
+    <div class="bsod-text">
+      A fatal exception 0xFEEDFACE has occurred at 0x0000:CASH. <br>
+      The current withdrawal will be terminated. <br><br>
+      * Prank protocol activated: your funds are safe (but not really). <br>
+      * Press any key to return to the neon lobby ... <br>
+      * ERROR: PRANK_MODE_ACTIVE <br><br>
+      Technical information: <br>
+      *** STOP: 0x0000BEEF (0xWITHDRAW, 0xLOL, 0xNOPE) <br><br>
+      Collecting crash dump... fake_bsod_77.dmp <br>
+      (This is satire, no actual cash involved.)
+    </div>
+  </div>
+
+  <script>
+    (function() {
+      // ----- State -----
+      let registered = false;
+      let bsodTimer = null;
+
+      // DOM elements
+      const registerPanel = document.getElementById('registerPanel');
+      const gameBlocks = document.getElementById('gameBlocks');
+      const registerBtn = document.getElementById('registerBtn');
+      const usernameInput = document.getElementById('usernameInput');
+
+      const womenCanvas = document.getElementById('wheelWomenCanvas');
+      const kickCanvas = document.getElementById('kickCanvas');
+      const womenGameResult = document.getElementById('womenGameResult');
+      const mensGameResult = document.getElementById('mensGameResult');
+      const withdrawWomenBtn = document.getElementById('withdrawWomenBtn');
+      const withdrawMenBtn = document.getElementById('withdrawMenBtn');
+      const bsodOverlay = document.getElementById('bsod-overlay');
+
+      // Wheel variables (women)
+      let wheelAngle = 0;
+      let spinAnimationId = null;
+      let spinActive = false;
+
+      // Men's kick canvas
+      let kickFrame = 0;
+      let kickAnimationId = null;
+      let kickActive = false;
+
+      // ----- Drawing functions -----
+      function drawWheel(angle) {
+        if (!womenCanvas) return;
+        const ctx = womenCanvas.getContext('2d');
+        const w = womenCanvas.width;
+        const h = womenCanvas.height;
+        ctx.clearRect(0, 0, w, h);
+        const cx = w/2, cy = h/2, r = w/2 - 6;
+        
+        // background wheel segments (neon pink/gold)
+        const segments = 6;
+        for (let i = 0; i < segments; i++) {
+          const startAngle = angle + (i * 2 * Math.PI / segments);
+          const endAngle = startAngle + (2 * Math.PI / segments);
+          ctx.beginPath();
+          ctx.moveTo(cx, cy);
+          ctx.arc(cx, cy, r, startAngle, endAngle);
+          ctx.closePath();
+          if (i % 2 === 0) ctx.fillStyle = '#ff4dd8';
+          else ctx.fillStyle = '#ffb03a';
+          ctx.fill();
+          ctx.strokeStyle = '#fff0d0';
+          ctx.lineWidth = 2;
+          ctx.stroke();
+        }
+        // center dot
+        ctx.beginPath();
+        ctx.arc(cx, cy, 12, 0, 2*Math.PI);
+        ctx.fillStyle = '#ffd700';
+        ctx.shadowColor = '#ff00c8';
+        ctx.shadowBlur = 20;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        // draw pointer
+        ctx.beginPath();
+        ctx.moveTo(cx - 5, cy - r);
+        ctx.lineTo(cx + 5, cy - r);
+        ctx.lineTo(cx, cy - r + 18);
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowBlur = 15;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+      }
+
+      function drawKickCanvas(ballX, ballY, goalFlash) {
+        const ctx = kickCanvas.getContext('2d');
+        const w = kickCanvas.width, h = kickCanvas.height;
+        ctx.clearRect(0, 0, w, h);
+        // background: stadium
+        ctx.fillStyle = '#03182b';
+        ctx.fillRect(0, 0, w, h);
+        // goal posts
+        ctx.strokeStyle = '#c0e0ff';
+        ctx.lineWidth = 5;
+        ctx.strokeRect(w-40, h/2-25, 30, 50);
+        // grass line
+        ctx.fillStyle = '#0b3b2c';
+        ctx.fillRect(0, h-15, w, 15);
+        // ball
+        ctx.beginPath();
+        ctx.arc(ballX, ballY, 9, 0, 2*Math.PI);
+        ctx.fillStyle = '#ffffff';
+        ctx.shadowColor = '#00ccff';
+        ctx.shadowBlur = 18;
+        ctx.fill();
+        ctx.shadowBlur = 0;
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 1.5;
+        ctx.stroke();
+        // flash if goal
+        if (goalFlash) {
+          ctx.fillStyle = 'rgba(255, 255, 100, 0.7)';
+          ctx.fillRect(0,0,w,h);
+        }
+      }
+
+      // Initial drawings
+      drawWheel(0);
+      drawKickCanvas(20, 45, false);
+
+      // ----- Women's spin interaction -----
+      womenCanvas.addEventListener('click', function() {
+        if (spinActive || !registered) return;
+        spinActive = true;
+        womenGameResult.textContent = '💫 spinning... 💫';
+        let targetAngle = wheelAngle + (Math.PI * 2 * 5) + Math.random() * Math.PI;
+        let duration = 1200; // ms
+        let start = performance.now();
+        let initialAngle = wheelAngle;
+        function animateSpin(now) {
+          let elapsed = now - start;
+          let progress = Math.min(elapsed / duration, 1);
+          // ease out
+          let eased = 1 - Math.pow(1 - progress, 3);
+          let currentAngle = initialAngle + (targetAngle - initialAngle) * eased;
+          wheelAngle = currentAngle;
+          drawWheel(currentAngle);
+          if (progress < 1) {
+            spinAnimationId = requestAnimationFrame(animateSpin);
+          } else {
+            spinActive = false;
+            womenGameResult.textContent = '🎰 JACKPOT READY 🎰';
+          }
+        }
+        spinAnimationId = requestAnimationFrame(animateSpin);
+      });
+
+      // ----- Men's kick interaction -----
+      kickCanvas.addEventListener('click', function() {
+        if (kickActive || !registered) return;
+        kickActive = true;
+        mensGameResult.textContent = '⚡ SHOOTING... ⚡';
+        let duration = 800;
+        let start = performance.now();
+        function animateKick(now) {
+          let elapsed = now - start;
+          let progress = Math.min(elapsed / duration, 1);
+          // ball moves toward goal
+          let ballX = 15 + progress * 110; // start left, goal right
+          let ballY = 45 + Math.sin(progress * Math.PI * 2) * 8; // little arc
+          let goalFlash = progress > 0.85;
+          drawKickCanvas(ballX, ballY, goalFlash);
+          if (progress < 1) {
+            kickAnimationId = requestAnimationFrame(animateKick);
+          } else {
+            kickActive = false;
+            mensGameResult.textContent = '🥅 GOAL! COLLECT 🥅';
+            drawKickCanvas(125, 45, true);
+          }
+        }
+        kickAnimationId = requestAnimationFrame(animateKick);
+      });
+
+      // ----- Registration logic -----
+      function handleRegister() {
+        if (usernameInput.value.trim() === '') {
+          usernameInput.style.borderColor = '#ff0000';
+          return;
+        }
+        registered = true;
+        registerPanel.classList.add('hidden');
+        gameBlocks.classList.remove('hidden');
+        // re-draw canvases
+        drawWheel(wheelAngle);
+        drawKickCanvas(20, 45, false);
+        womenGameResult.textContent = '✨ spin to win ✨';
+        mensGameResult.textContent = '⚽ CLICK TO KICK';
+      }
+
+      registerBtn.addEventListener('click', handleRegister);
+      usernameInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') handleRegister();
+      });
+
+      // ----- BSOD function -----
+      function triggerBSOD() {
+        if (bsodTimer) clearTimeout(bsodTimer);
+        bsodOverlay.style.display = 'flex';
+        // Hide any other content? no, overlay covers.
+        bsodTimer = setTimeout(() => {
+          bsodOverlay.style.display = 'none';
+          // reset some visuals
+          drawWheel(wheelAngle);
+          drawKickCanvas(20, 45, false);
+          womenGameResult.textContent = '✨ spin to win ✨';
+          mensGameResult.textContent = '⚽ CLICK TO KICK';
+        }, 5000);
+      }
+
+      // Withdraw buttons both trigger BSOD
+      withdrawWomenBtn.addEventListener('click', () => {
+        if (!registered) return;
+        triggerBSOD();
+      });
+
+      withdrawMenBtn.addEventListener('click', () => {
+        if (!registered) return;
+        triggerBSOD();
+      });
+
+      // Prevent context menu on canvases?
+      womenCanvas.addEventListener('contextmenu', e => e.preventDefault());
+      kickCanvas.addEventListener('contextmenu', e => e.preventDefault());
+
+      // In case user tries to interact before register, still allow but maybe no effect? We already check registered.
+      // Add glitch sparkle effect for women canvas via class
+    })();
+  </script>
+</body>
+</html>
